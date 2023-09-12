@@ -17,14 +17,17 @@ from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain.llms import HuggingFacePipeline
 
+hf_auth_token = "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"
 # model_names = ["tiiuae/falcon-7b-instruct", "tiiuae/falcon-40b-instruct", "tiiuae/falcon-rw-1b"]
-model_names = ["tiiuae/falcon-7b-instruct"]
+# model_names = ["tiiuae/falcon-7b-instruct", "meta-llama/Llama-2-70b-chat-hf"]
+model_names = ["meta-llama/Llama-2-13b-chat-hf"]
 models = {}
-embedding_function_name = "all-mpnet-base-v2"
+# embedding_function_name = "all-mpnet-base-v2"
+embedding_function_name = "sentence-transformers/all-MiniLM-L6-v2"
 device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
-max_new_tokens = 1024
+max_new_tokens = 512 #1024
 repetition_penalty = 10.0
-temperature = 0
+temperature = 0.0 #0
 chunk_size = 512
 chunk_overlap = 32
 
@@ -50,6 +53,14 @@ def create_models():
             )
             model = transformers.AutoModelForCausalLM.from_pretrained(
                 model_name,
+                trust_remote_code=True,
+                quantization_config=bnb_config,
+                device_map='auto'
+            )
+        elif model == "meta-llama/Llama-2-13b-chat-hf":
+            model = transformers.AutoModelForCausalLM.from_pretrained(
+                model_name,
+                use_auth_token=hf_auth_token,
                 trust_remote_code=True,
                 quantization_config=bnb_config,
                 device_map='auto'
@@ -100,7 +111,11 @@ def bot(model_name, db_path, chat_mode, history):
     # Need to create langchain model from db for each session
     db = Chroma(persist_directory=db_path, embedding_function=embedding_function)
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
+    tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_auth_token)
+    # if model_name == "meta-llama/Llama-2-70b-chat-hf":
+    #     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, use_auth_token=hf_auth_token)
+    # else:
+    #     tokenizer = transformers.AutoTokenizer.from_pretrained(model_name)
     stop_token_ids = [
         tokenizer.convert_tokens_to_ids(x) for x in [
             ['Question', ':'],
@@ -196,8 +211,8 @@ def init():
             """
                 <div style="text-align: center; max-width: 650px; margin: 0 auto;">
                   <div>
-                    <img class="logo" src="https://lambdalabs.com/hubfs/logos/lambda-logo.svg" alt="Lambda Logo"
-                        style="margin: auto; max-width: 7rem;">
+                    # <img class="logo" src="https://lambdalabs.com/hubfs/logos/lambda-logo.svg" alt="Lambda Logo"
+                    #     style="margin: auto; max-width: 7rem;">
                     <h1 style="font-weight: 900; font-size: 3rem;">
                       Q&A App Demo
                     </h1>
@@ -241,9 +256,9 @@ def init():
                     <div class="footer">
                         <p> A chatbot tries to give helpful, detailed, and polite answers to the user's questions. </p>
                     </div>
-                    <div class="acknowledgments">
-                        <p> TBD
-                    </div>
+                    # <div class="acknowledgments">
+                    #     <p> TBD
+                    # </div>
                 """
             )
 
