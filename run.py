@@ -44,27 +44,33 @@ def create_embedding_function(embedding_function_name):
 def create_models():
     for model_name in model_names:
 
-        if model_name == "tiiuae/falcon-40b-instruct":
+        if model_name == "meta-llama/Llama-2-13b-chat-hf":
             bnb_config = transformers.BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_quant_type='nf4',
                 bnb_4bit_use_double_quant=True,
                 bnb_4bit_compute_dtype=bfloat16
             )
+            model_config = transformers.AutoConfig.from_pretrained(
+                model_name,
+                use_auth_token=hf_auth_token
+            )
             model = transformers.AutoModelForCausalLM.from_pretrained(
                 model_name,
                 trust_remote_code=True,
+                config=model_config,
                 quantization_config=bnb_config,
-                device_map='auto'
+                device_map='auto',
+                use_auth_token=hf_auth_token
             )
-        elif model == "meta-llama/Llama-2-13b-chat-hf":
-            model = transformers.AutoModelForCausalLM.from_pretrained(
-                model_name,
-                use_auth_token=hf_auth_token,
-                trust_remote_code=True,
-                quantization_config=bnb_config,
-                device_map='auto'
-            )
+        # elif model_name == "meta-llama/Llama-2-13b-chat-hf":
+        #     model = transformers.AutoModelForCausalLM.from_pretrained(
+        #         model_name,
+        #         use_auth_token=hf_auth_token,
+        #         trust_remote_code=True,
+        #         quantization_config=bnb_config,
+        #         device_map='auto'
+        #     )
         else:
             model = transformers.AutoModelForCausalLM.from_pretrained(
                 model_name,
