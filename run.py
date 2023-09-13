@@ -75,7 +75,7 @@ def create_models():
         print(f"Model loaded on {device}")
         models[model_name] = model
     
-    
+
 create_models()
 embedding_function = create_embedding_function(embedding_function_name)
 
@@ -209,8 +209,8 @@ def init():
             """
                 <div style="text-align: center; max-width: 650px; margin: 0 auto;">
                   <div>
-                    <img class="logo" src="https://lambdalabs.com/hubfs/logos/lambda-logo.svg" alt="Lambda Logo"
-                        style="margin: auto; max-width: 7rem;">
+                    # <img class="logo" src="https://lambdalabs.com/hubfs/logos/lambda-logo.svg" alt="Lambda Logo"
+                    #     style="margin: auto; max-width: 7rem;">
                     <h1 style="font-weight: 900; font-size: 3rem;">
                       Q&A App Demo
                     </h1>
